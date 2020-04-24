@@ -248,14 +248,48 @@ public class EMail {
 				print("\(data.utf8.count) bytes attached")
 			}
 			// pack it up to an MIME part
-			return "--\(boundary)\r\nContent-Type: \(mimeType); name=\"\(file)\"\r\n"
+			let filename = paramterRfc2231(something: file)
+			let name = contentTypefilenameParameter(something: file)
+			return "--\(boundary)\r\n"
+				+ "Content-Disposition: \(disposition);\r\n"
+				+ "    filename*=\(filename)\r\n"
+				+ "Content-Type: \(mimeType);\r\n"
+				+ "    name=\"\(name)\"\r\n"
 				+ "Content-Transfer-Encoding: base64\r\n"
-				+ "Content-Disposition: \(disposition); filename=\"\(file)\"\r\n\r\n\(data)\r\n"
+				+ "\r\n\(data)\r\n"
 		} catch {
 			return ""
 		}
 	}
 
+<<<<<<< HEAD
+=======
+	/// https://www.ietf.org/rfc/rfc2047.txt
+	/// encode a string to url encode conform string
+	/// - parameters:
+	///   - something: a string to be encoded
+	/// - returns:
+	/// base64 but rfc2047 conform string
+	private func contentTypefilenameParameter(something: String) -> String {
+		let something = something.base64Encoded()!
+		// from rfc2047 encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
+		//   Q is "Quoted-Printable" content-transfer-encoding defined in RFC 2045
+		//   B is Base64
+		return "=?utf-8?B?\(something)?="
+	}
+
+	/// https://tools.ietf.org/html/rfc2231
+	/// encode a string to url encode conform string
+	/// - parameters:
+	///   - something: a string to be encoded
+	/// - returns:
+	/// url encoded string
+	private func paramterRfc2231(something: String) -> String {
+		let something = something.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+		return "utf-8''\(something)"
+	}
+
+>>>>>>> fix(attachment:filename): fix the mime filename header
 	/// encode a file by base64 method
 	/// - parameters:
 	///   - path: full path of the file to encode
